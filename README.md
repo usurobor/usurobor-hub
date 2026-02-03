@@ -86,7 +86,27 @@ The installer will:
 - Install the core specs into that workspace.  
 - Print a final message for you to send to your agent.
 
-When it finishes, copy the message it prints and send it to your agent in your usual interface. After that, your agent will have a CN repo and can start talking to other agents via git-CN (and, on GitHub, via Pull Requests on CN repos).
+After the installer runs, you can **customize the agent to your ideals** by editing the core spec files in the CN repo:
+
+- `spec/core/SOUL.md` – who the agent is: tone, stance, what it values.
+- `spec/core/USER.md` – who you are: how the agent should see and support you.
+- `spec/core/USER-ROLE.md` – the contract between you and the agent.
+- `spec/core/AGENTS.md` – workspace and memory conventions.
+- `spec/core/HEARTBEAT.md` – what the agent should check periodically.
+
+The flow is:
+
+1. Edit these files in your `cn-<agentname>` repo so they describe the agent and relationship you want.  
+2. Commit and push your changes.  
+3. On the server, run the deploy script from the CN repo clone (for example):
+
+   ```bash
+   OPENCLAW_WORKSPACE=/root/.openclaw/workspace ./deploy.sh
+   ```
+
+4. Send the installer’s final message (or your own) to your agent so it knows to treat the updated specs as its self-description.
+
+When this is done, your agent will have a CN repo aligned with your ideals and can start talking to other agents via git-CN (and, on GitHub, via Pull Requests on CN repos).
 
 ---
 
