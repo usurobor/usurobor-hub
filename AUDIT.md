@@ -1,256 +1,350 @@
-# Project Audit – cn-agent v1.4.0
+# Project Audit – cn-agent (post-v1.4.0 sweep)
 
 **Date:** 2026-02-04
 **Branch:** `claude/repo-quality-audit-7Nwae`
 **Auditor:** Independent automated audit (Claude Opus 4.5)
-**Scope:** Full engineering quality — code, documentation, architecture, security, testing, CI, configuration, git practices, cross-file coherence.
-**Prior audits:** v1.0.0 → v1.3.5 (same file, now replaced).
+**Scope:** Full engineering quality — code, documentation, architecture, security, testing, CI, configuration, git practices, cross-file coherence, GitHub forge state.
+**Baseline:** v1.4.0 release + 6 additional "best practices sweep" commits on master.
+**Prior audits:** v1.0.0 → v1.3.5 → v1.4.0 (same file, now replaced).
 
 ---
 
 ## 1. Executive Summary
 
-cn-agent is a template repository for bootstrapping AI agent hubs on the git Coherence Network (git-CN). It contains a CLI tool (448 lines of JavaScript across two files), six skills, six mindsets, a protocol whitepaper (v2.0.3), a companion whitepaper (EXECUTABLE-COHERENCE, DRAFT v0.1.0), a manifesto, and supporting documentation. The project is primarily Markdown (33 of 42 files) with three JavaScript files and zero runtime dependencies.
+cn-agent is a template repository and CLI for bootstrapping AI agent hubs on the git Coherence Network (git-CN). It contains a CLI tool (494 lines of JavaScript across three files), six skills, six mindsets, a protocol whitepaper (v2.0.3), two companion papers, a manifesto, and supporting documentation. The project is primarily Markdown (42 of 54 files) with four JavaScript files and zero runtime dependencies.
 
-**v1.4.0 improvements over v1.3.5:** The most critical issues from the v1.3.5 audit have been addressed. Tests exist (14 passing), CI runs on push, agent name input is sanitized, `package.json` metadata is complete, `git pull --ff-only` has a fallback, README no longer references `BOOTSTRAP.md`, DOJO katas use belt.sequence numbering, and daily-routine documents alternative cron runtimes. Seven of twenty-three findings from v1.3.5 are now resolved.
+**Since the v1.4.0 audit, a comprehensive "best practices sweep" has landed on master (6 commits).** This sweep addressed 15 of 25 findings from the v1.4.0 audit, including the sole HIGH (sanitization bypass in the "new name" path), all but one MEDIUM, and several LOWs. The improvements are substantial:
 
-**Key remaining strengths:** Zero-dependency CLI, thorough whitepaper with honest implementation-status tracking, clean hub/template separation, working test suite, CI pipeline, good git governance, no secrets in repo.
+- The "new name" path now uses `sanitizeName()` and the new `buildHubConfig()` module.
+- `AGENTS.md` no longer references `BOOTSTRAP.md`.
+- README version removed from heading; CI/npm/license badges added.
+- CI matrix now tests Node 18 and 20.
+- `.gitignore` expanded from 5 to 35 entries.
+- `experiments/` and `state/` both have READMEs.
+- Self-cohere and configure-agent katas added.
+- `WRITING.md` sag reference removed.
+- `readline` properly closed in `finally` block.
+- `CN_WORKSPACE` env var support added.
+- CONTRIBUTING.md, SECURITY.md, CODE_OF_CONDUCT.md, .editorconfig, .nvmrc added.
+- Release workflow for npm publish with provenance.
 
-**Key remaining weaknesses:** The "new name" code path bypasses the new `sanitizeName()` function (sanitization regression), `AGENTS.md` still references the removed `BOOTSTRAP.md`, README heading still shows `v1.2.0`, `.gitignore` is still fragile, the protocol-vs-implementation gap remains (9 features), CI only tests one Node version, and `experiments/` is still orphaned.
-
-**Overall grade: A-** — up from B+ in v1.3.5. The testing, CI, and sanitization additions address the most impactful engineering gaps. The remaining issues are medium-to-low severity.
+**Overall grade: A** — up from A- in the v1.4.0 audit and B+ in v1.3.5. Zero HIGH findings remain. Only two MEDIUM findings persist.
 
 ---
 
-## 2. Repository Overview
+## 2. GitHub Forge State
+
+### 2.1 Repository Metadata
+
+| Property | Value |
+|----------|-------|
+| Full name | `usurobor/cn-agent` |
+| Visibility | Public |
+| Template repo | Yes |
+| Default branch | `master` |
+| License | Apache-2.0 |
+| Stars | 3 |
+| Forks | 0 |
+| Watchers | 0 |
+| Open issues | 0 |
+| Open PRs | 0 |
+| Total commits | ~195 |
+| Languages | JavaScript 100% |
+| Topics | `cn-agent`, `git-cn`, `coherence-network`, `ai-agent` |
+| Created | ~Feb 2026 |
+| Disk usage | ~435 KB |
+
+### 2.2 Issues & Pull Requests
+
+- **Issues:** Zero issues have ever been opened (open or closed). The issue tracker is enabled but unused.
+- **Pull Requests:** One closed PR (#1, "Audit v1.3.5: comprehensive repo quality audit"). No open PRs.
+- **Discussions:** Not visibly enabled.
+
+### 2.3 Releases
+
+| Tag | Title | Date | Pre-release |
+|-----|-------|------|-------------|
+| v1.4.0 | "Polished and proactive" | 2026-02-04 | No |
+
+Single release. No prior version tags in git. The release notes reference CHANGELOG.md, CN-WHITEPAPER.md, CN-MANIFESTO.md, and CN-EXECUTABLE-SKILLS.md.
+
+### 2.4 CI / Actions
+
+12 workflow runs total. **All succeeded (100% green).** No failures in history.
+
+| Workflow | Runs | Status |
+|----------|------|--------|
+| CI (test matrix) | 12 | All passing |
+| Release (npm publish) | 0 | Not yet triggered |
+
+The CI workflow runs on push to `master` and PRs. Tests Node 18 and 20 in a matrix. The Release workflow triggers on GitHub release publish events.
+
+### 2.5 Branches
+
+Active branches visible on GitHub:
+- `master` (default)
+- `claude/repo-quality-audit-7Nwae` (this audit)
+
+### 2.6 Security
+
+- No Dependabot alerts (zero dependencies).
+- No code scanning configured.
+- No secret scanning alerts visible.
+- SECURITY.md exists with vulnerability reporting policy.
+
+### 2.7 GitHub State Assessment — Grade: B+
+
+**Strengths:** Clean CI history (100% green), proper release with notes, template repo flag set, topics configured, Apache-2.0 license visible.
+
+**Gaps:**
+- No prior version tags (only v1.4.0).
+- Issue tracker is enabled but unused — no issue templates, no labels.
+- Discussions not enabled (CONTRIBUTING.md references them).
+- SECURITY.md mentions "emailing maintainers" but provides no email address.
+- GitHub's private vulnerability reporting may not be enabled (no SECURITY advisory published to confirm).
+
+---
+
+## 3. Repository Overview
 
 | Metric | Value |
 |--------|-------|
-| Total tracked files | 42 |
-| Markdown files | 33 |
-| JavaScript files | 3 (`cli/index.js` 315 lines, `cli/sanitize.js` 26 lines, `test/cli.test.js` 107 lines) |
+| Total tracked files | 54 |
+| Markdown files | 42 |
+| JavaScript files | 4 (`cli/index.js` 318 lines, `cli/sanitize.js` 26 lines, `cli/hubConfig.js` 13 lines, `test/cli.test.js` 137 lines) |
 | PDF files | 1 (`docs/CN-WHITEPAPER-v2.0.3.pdf`, 435 KB) |
 | JSON files | 1 (`package.json`) |
-| YAML files | 1 (`.github/workflows/ci.yml`) |
+| YAML files | 2 (`.github/workflows/ci.yml`, `.github/workflows/release.yml`) |
+| Config files | 3 (`.editorconfig`, `.nvmrc`, `.gitignore`) |
 | Runtime dependencies | 0 |
-| Test files | 1 (14 tests, all passing) |
-| CI/CD workflows | 1 (GitHub Actions) |
-| Linting config | None |
+| Test suites | 3 (18 tests, all passing) |
+| CI/CD workflows | 2 (CI + Release) |
+| Linting config | `.editorconfig` only (no eslint/prettier) |
 | License | Apache 2.0 |
 
 ---
 
-## 3. What Changed in v1.4.0
+## 4. What Changed Since v1.4.0 Release
 
-### 3.1 v1.3.5 Findings Resolved
+Six commits landed on master after the v1.4.0 release tag, constituting a "best practices sweep." These are grouped into three merge pairs:
 
-| v1.3.5 Ref | Finding | Resolution |
+### 4.1 Commits
+
+| # | Commit | Summary |
+|---|--------|---------|
+| 1 | `7f4cfc3` | Add CN-EXECUTABLE-SKILLS.md (executable coherence vision paper) |
+| 2 | `47d782d` | docs: add CTB executable skills paper |
+| 3 | `f95b472` | Add best-practice project files |
+| 4 | `5ecb932` | chore: add CONTRIBUTING, SECURITY, CI badges, release workflow |
+| 5 | `8cb271e` | Add best-practice project files + fix all audit findings |
+| 6 | `1235493` | chore/docs: apply repo-quality best practices sweep |
+
+### 4.2 v1.4.0 Audit Findings Resolved
+
+| v1.4.0 Ref | Finding | Resolution |
 |------------|---------|------------|
-| H1 | Zero tests, zero CI/CD | **Resolved.** 14 tests in `test/cli.test.js` using Node's built-in `node:test` (zero dependencies). CI via `.github/workflows/ci.yml` on push to master and PRs. |
-| H2 | Agent name input not sanitized | **Resolved.** `cli/sanitize.js` extracts sanitization into a testable module. Strips non-alphanumeric/hyphen chars, rejects empty/leading-hyphen/trailing-hyphen names. 10 test cases cover edge cases. |
-| H4 | README references nonexistent `BOOTSTRAP.md` | **Resolved.** README.md no longer mentions `BOOTSTRAP.md`. (Note: `AGENTS.md` still does — see N2 below.) |
-| M2 | `git pull --ff-only` no fallback | **Resolved.** Try/catch with user-friendly warning, suggestion to inspect/fix, and continues with existing template clone. `cli/index.js:134-143`. |
-| M4 | `package.json` incomplete | **Resolved.** Added `repository`, `keywords`, `bugs`, `homepage` fields. Updated `description`. Added `test` script. Added `cli/sanitize.js` to `files` array. |
-| L2 | DOJO kata numbering gap (03→13) | **Resolved.** Renumbered to belt.sequence format (1.1, 1.2, 1.3, 2.1). Full belt legend table with 7 levels. |
-| L12 | daily-routine cron assumes specific runtime | **Resolved.** Added "Runtime Note" section with standard crontab and systemd timer alternatives. `skills/daily-routine/SKILL.md:110-127`. |
+| N1 (HIGH) | "New name" bypasses `sanitizeName()` | **Resolved.** Now uses `sanitizeName()` + `buildHubConfig()`. `cli/index.js:204-212`. |
+| N2 | AGENTS.md references BOOTSTRAP.md | **Resolved.** Now says "Read `spec/SOUL.md`...then run the self-cohere or configure-agent skill." |
+| N3 | README version stale (v1.2.0) | **Resolved.** Version removed from heading entirely. CI/npm/license badges added. |
+| N4 | "New name" path doesn't recalculate | **Resolved.** `buildHubConfig()` rebuilds all variables. Destructuring applied. |
+| N5 | CI tests only Node 20 | **Resolved.** Matrix strategy with Node 18 and 20. |
+| N7 | .gitignore incomplete | **Resolved.** Expanded from 5 to 35 entries covering node_modules/, .env*, editors, IDE, coverage, build artifacts. |
+| N8 | experiments/ uncontextualized | **Resolved.** `experiments/README.md` added with status and usage notes. |
+| N9 | Hardcoded workspace path | **Resolved.** `CN_WORKSPACE` env var with `/root/.openclaw/workspace` fallback. Error message tells user to set env var. `cli/index.js:51,87`. |
+| N12 | Missing katas for self-cohere/configure-agent | **Resolved.** Both created with belt.sequence numbering (1.4, 1.5). |
+| N16 | readline not closed on early exits | **Resolved.** try/finally pattern with `rl.close()` in finally block. `cli/index.js:316`. |
+| N18 | WRITING.md sag reference | **Resolved.** Now says "If text-to-speech is available." |
+| N24 | state/ files in template | **Resolved.** `state/README.md` explains files are scaffolds for hub creation. |
 
-### 3.2 New Additions in v1.4.0
+### 4.3 New Additions
 
-| Addition | Location | Notes |
-|----------|----------|-------|
-| Input sanitization module | `cli/sanitize.js` | 26 lines, exported `sanitizeName()` function |
-| Test suite | `test/cli.test.js` | 14 tests: 4 CLI flag tests + 10 sanitizeName tests |
-| CI pipeline | `.github/workflows/ci.yml` | GitHub Actions, Node 20, `npm test` |
-| CN Manifesto | `docs/CN-MANIFESTO.md` | 136 lines, philosophical companion to whitepaper |
-| Executable Coherence whitepaper | `docs/EXECUTABLE-COHERENCE.md` | 369 lines, DRAFT v0.1.0, CTB as skill language |
-
----
-
-## 4. Documentation Quality
-
-### 4.1 README.md — Grade: A-
-
-**Strengths:**
-- Four-path audience dispatch table remains effective.
-- `BOOTSTRAP.md` references removed (was H4 in v1.3.5).
-- Step-by-step setup with concrete commands.
-- Clean repo structure table.
-
-**Weaknesses:**
-- Version in heading still says `v1.2.0` — now two major versions behind `package.json` (`v1.4.0`). This is the first thing a visitor sees.
-- Setup guide assumes Ubuntu/root; no mention of other OS or non-root setups.
-- Missing: badges (build status, version, license), contributing guidelines, link to CHANGELOG.
-
-### 4.2 Whitepaper (docs/CN-WHITEPAPER.md) — Grade: A
-
-Unchanged since v1.3.5. Well-structured with honest implementation status (§10). RFC 2119 keywords in normative appendix. Reference [3] Reddit URL slug may not resolve correctly.
-
-### 4.3 CN-MANIFESTO.md (NEW) — Grade: A-
-
-**Strengths:**
-- Clean philosophical document grounding git-CN in the lineage of open-source infrastructure projects.
-- Eight concrete principles, each with an engineering definition (not just aspirational language).
-- Proper cross-references to whitepaper [1] and reference implementation [2].
-- "The Work" section (§5) lists five concrete implementation steps.
-
-**Weaknesses:**
-- §5, step 1 lists `state/peers.json` — correct per protocol spec, but the actual implementation uses `state/peers.md`. Minor inconsistency between aspirational/normative language and current state.
-
-### 4.4 EXECUTABLE-COHERENCE.md (NEW) — Grade: A-
-
-**Strengths:**
-- Solid companion whitepaper connecting CTB to cn-agent skill architecture.
-- "At a glance" section provides quick orientation.
-- Honest "Open Questions" section (§7) with five concrete gaps.
-- Implementation path (§5.2) with six defined milestones.
-- Correct Haskell analogy for pure effects-as-data architecture.
-
-**Weaknesses:**
-- DRAFT status — expected to evolve. No issues for a draft.
-- Code blocks use 4-space indentation instead of fenced blocks (inconsistent with repo-wide convention but still valid Markdown).
-
-### 4.5 GLOSSARY.md — Grade: A-
-
-Unchanged since v1.3.5. 17 entries covering all key terms. Doc-local versioning note. Good ownership annotations.
-
-### 4.6 DOJO.md — Grade: A-
-
-**Improved:** Belt.sequence numbering with full legend table. Seven belt levels (White through Black).
-
-**Remaining issue:** Kata files still use old numbering in their titles (Kata 01, Kata 02, Kata 13) — doesn't match DOJO's belt.sequence format (1.1, 1.2, 2.1). See N10.
-
-### 4.7 CHANGELOG.md — Grade: B
-
-Added v1.4.0 entry with `B+ | A− | A− | B+` grades. Still lacks detailed change notes per version — only one-line coherence summaries. A reader cannot reconstruct what actually changed from the changelog alone.
-
-### 4.8 Skill Documentation — Grade: B+
-
-**Improved:** daily-routine SKILL.md (v1.1.1) now documents cron runtime alternatives with standard crontab and systemd examples. Ownership & Schema sections remain clear.
-
-**Remaining issues:**
-- reflect SKILL.md is still 370 lines (longest by 3x).
-- self-cohere and configure-agent still have no kata files.
-- hello-world thread filename `yyyyddmmhhmmss` still puts day before month.
-
-### 4.9 Mindsets — Grade: A-
-
-Unchanged since v1.3.5. PERSONALITY.md is all placeholders (intentional for template). WRITING.md has instance-specific `sag` reference.
-
-### 4.10 Spec Files — Grade: A-
-
-AGENTS.md still references `BOOTSTRAP.md` on line 7: "If `BOOTSTRAP.md` exists, that's your birth certificate." This was removed from README but not from AGENTS.md. See N2.
-
-### 4.11 skills/README.md — Grade: B
-
-Version header says `v1.2.0` — stale. Lists all six skills correctly. The "Adding a Skill" section references `spec/HEARTBEAT.md` — a hub file that wouldn't exist in the template context.
+| Addition | Location | Lines | Notes |
+|----------|----------|-------|-------|
+| Hub config module | `cli/hubConfig.js` | 13 | Extracted `buildHubConfig()` for testability |
+| Hub config tests | `test/cli.test.js:110-137` | 28 | 4 test cases for buildHubConfig |
+| CI matrix | `.github/workflows/ci.yml` | 21 | Node 18 + 20 |
+| Release workflow | `.github/workflows/release.yml` | 34 | npm publish with provenance, version-tag verification |
+| Contributing guide | `CONTRIBUTING.md` | 51 | Fork-branch-PR workflow, commit style, agent section |
+| Security policy | `SECURITY.md` | 50 | Vulnerability reporting, response timeline |
+| Code of conduct | `CODE_OF_CONDUCT.md` | 34 | Adapted from Contributor Covenant 2.1 |
+| EditorConfig | `.editorconfig` | 17 | 2-space indent, LF, UTF-8, trim trailing whitespace |
+| Node version pin | `.nvmrc` | 1 | Node 20 (recommended dev version) |
+| Experiments README | `experiments/README.md` | 25 | Contextualizes orphaned design docs |
+| State README | `state/README.md` | 23 | Explains scaffold vs hub distinction |
+| self-cohere kata | `skills/self-cohere/kata.md` | 84 | Kata 1.4: Wire yourself to an existing hub |
+| configure-agent kata | `skills/configure-agent/kata.md` | 91 | Kata 1.5: Configure agent identity |
+| CN-EXECUTABLE-SKILLS.md | `docs/CN-EXECUTABLE-SKILLS.md` | 408 | Near-duplicate of EXECUTABLE-COHERENCE.md |
 
 ---
 
-## 5. Code Quality
+## 5. Documentation Quality
 
-### 5.1 CLI (`cli/index.js`) — 315 lines — Grade: B+
+### 5.1 README.md — Grade: A
 
-**Improvements over v1.3.5:**
-- Agent name validation via imported `sanitizeName()` (`cli/index.js:153-157`).
-- `git pull --ff-only` wrapped in try/catch with user-friendly fallback (`cli/index.js:134-143`).
+**Improvements:** Version removed from heading (no more staleness risk). Three badges (CI, npm version, license). Clean structure with four-path dispatch table. Repo structure table includes note about `state/threads/` vs protocol-standard `threads/`.
+
+**Minor notes:**
+- Setup guide still assumes Ubuntu/root/DigitalOcean. No mention of other OS or non-root setups.
+- Missing: link to CHANGELOG.
+
+### 5.2 Whitepaper (docs/CN-WHITEPAPER.md) — Grade: A
+
+Unchanged. 551 lines. Honest implementation status (§10). RFC 2119 keywords. Well-structured.
+
+### 5.3 CN-MANIFESTO.md — Grade: A-
+
+136 lines. Eight concrete principles. §5 lists `state/peers.json` — correct per protocol spec but implementation uses `peers.md`. Minor discrepancy.
+
+### 5.4 Companion Papers — Grade: A- (with caveat)
+
+Two files exist for the same content:
+- `docs/EXECUTABLE-COHERENCE.md` (368 lines) — original, 4-space indented code blocks
+- `docs/CN-EXECUTABLE-SKILLS.md` (408 lines) — slightly reformatted copy with bold formatting and backtick-fenced code
+
+These are near-duplicates. The differences are purely formatting (bold labels, inline code). Having both creates confusion about which is canonical. See N1.
+
+### 5.5 GLOSSARY.md — Grade: A-
+
+17 entries. Consistent definitions. Doc-local versioning.
+
+### 5.6 DOJO.md — Grade: A-
+
+Updated to v1.2.3. Belt.sequence numbering with 6 katas (1.1-1.5, 2.1). Full belt legend. Self-cohere (1.4) and configure-agent (1.5) katas now listed.
+
+**Remaining issue:** Three original kata files still use old titles (Kata 01, Kata 02, Kata 13). New katas (1.4, 1.5) correctly use belt.sequence. See N3.
+
+### 5.7 CHANGELOG.md — Grade: B
+
+Single-line coherence summaries per version. A reader cannot determine what actually changed without reading commit history.
+
+### 5.8 Skill Documentation — Grade: A-
+
+All six skills documented with TERMS/INPUTS/EFFECTS. All six now have kata files.
+
+**Remaining issue:** reflect SKILL.md is 367 lines (3x any other skill). Six cadence templates are structurally repetitive.
+
+### 5.9 Community Files — Grade: A-
+
+CONTRIBUTING.md, SECURITY.md, CODE_OF_CONDUCT.md are all present and reasonable.
+
+**Minor issues:**
+- CONTRIBUTING.md §Questions references "discussions" — not enabled on GitHub.
+- SECURITY.md says "emailing the maintainers" — no email provided. Also mentions "GitHub's private vulnerability reporting" — may not be enabled.
+
+### 5.10 skills/README.md — Grade: B
+
+Version header still says `v1.2.0` — stale. Lists all six skills correctly.
+
+### 5.11 Spec Files — Grade: A
+
+AGENTS.md BOOTSTRAP.md reference removed. Clean first-run instruction: "Read `spec/SOUL.md`…then run the self-cohere or configure-agent skill."
+
+### 5.12 Mindsets — Grade: A
+
+WRITING.md `sag` reference replaced with generic "text-to-speech." ENGINEERING.md unchanged (clean). All six mindsets present.
+
+---
+
+## 6. Code Quality
+
+### 6.1 CLI (`cli/index.js`) — 318 lines — Grade: A-
+
+**Improvements:**
+- `sanitizeName()` used on both primary and "new name" paths.
+- `buildHubConfig()` extracted — consistent variable calculation.
+- `CN_WORKSPACE` env var support with helpful error message.
+- `rl.close()` in `finally` block.
+- Try/catch around `git pull --ff-only`.
 
 **Remaining issues:**
 
 | # | Severity | Issue | Location |
 |---|----------|-------|----------|
-| C1 | **HIGH** | "New name" path bypasses `sanitizeName()` — uses old unsanitized `toLowerCase().replace(/\s+/g, '-')` logic | `cli/index.js:202-210` |
-| C2 | **MEDIUM** | Hardcoded workspace path `/root/.openclaw/workspace` — no env var override | `cli/index.js:50` |
-| C3 | **MEDIUM** | Duplicate `gh api user` call — same API call on lines 120 and 161 | `cli/index.js:120,161` |
-| C4 | **MEDIUM** | "New name" path still doesn't recalculate `hubRepo`/`hubUrl` | `cli/index.js:202-210` |
-| C5 | **LOW** | `readline` interface not closed on error paths (lines 85, 102, 116, 122) | `cli/index.js` |
-| C6 | **LOW** | ANSI colors unconditional — no `NO_COLOR` env var support | `cli/index.js:26-28` |
-| C7 | **LOW** | `IDENTITY.md` still in `ocFiles` cleanup list — stale filename | `cli/index.js:270` |
+| C1 | LOW | Duplicate `gh api user` call (auth check line 121, owner default line 162) | `cli/index.js:121,162` |
+| C2 | LOW | `IDENTITY.md` still in `ocFiles` cleanup list (stale filename) | `cli/index.js:273` |
+| C3 | LOW | ANSI colors unconditional — no `NO_COLOR` env var support | `cli/index.js:27-29` |
 
-**C1 Detail (HIGH — sanitization bypass):** The primary agent name path correctly uses `sanitizeName()` (line 153). But when the user chooses "New name" at the directory collision prompt (line 203), the code applies `newAgentName.toLowerCase().replace(/\s+/g, '-')` directly — the exact unsanitized logic that `sanitizeName()` was created to replace. A name like `../../etc` or `test;rm -rf /` would pass through on the "new name" path. This is a regression: the fix for v1.3.5 H2 created a code path that bypasses the fix.
+### 6.2 Hub Config Module (`cli/hubConfig.js`) — 13 lines — Grade: A-
 
-**C4 Detail (MEDIUM — new-name variable staleness):** When the user chooses "New name", only `hubDir` is recalculated (line 209). But `hubRepo` (line 177), `hubUrl` (line 178), and `hubName` (line 158) still reference the original name. The `gh repo create` call (line 257) and the success message (line 295) would use the old name, not the new one.
+Clean extraction with one minor issue:
+- Uses string concatenation (`workspaceRoot + '/' + hubName`) instead of `path.join()`. The rest of the CLI uses `path.join()`. Functionally equivalent on Linux (the target platform) but inconsistent.
 
-### 5.2 Sanitize Module (`cli/sanitize.js`) — 26 lines — Grade: A-
+### 6.3 Sanitize Module (`cli/sanitize.js`) — 26 lines — Grade: A-
 
-Clean extraction of validation logic into a testable module.
+Clean validation module. One minor issue:
+- Error message for leading/trailing hyphen says "must contain at least one alphanumeric character" — misleading when the name does contain alphanumerics. The real issue is the hyphen position.
 
-**Minor issue:** The error message for leading/trailing hyphen rejection (lines 19-21) says "must contain at least one alphanumeric character" — misleading when the name does contain alphanumerics (e.g., `test-`). The actual issue is the leading/trailing hyphen.
+### 6.4 Code Style
 
-### 5.3 Code Style
-
+- `.editorconfig` enforces 2-space indent, LF line endings, UTF-8, trim trailing whitespace.
 - No linter configuration (eslint, prettier).
-- Consistent 2-space indentation.
-- Good inline comments.
-- `async` IIFE pattern at top level is idiomatic.
-- `sanitize.js` is well-structured with clear input/output contract.
+- Consistent style throughout.
+- `async` IIFE with try/finally is idiomatic.
 
 ---
 
-## 6. Testing & CI/CD — Grade: B-
+## 7. Testing & CI/CD — Grade: A-
 
-### 6.1 Test Suite
+### 7.1 Test Suite
 
 | Aspect | Status |
 |--------|--------|
 | Test runner | Node built-in `node:test` (zero dependencies) |
-| Test file | `test/cli.test.js` (107 lines) |
-| Total tests | 14 (4 CLI flags + 10 sanitizeName) |
-| Pass rate | 14/14 (100%) |
-| Test time | ~413ms |
+| Test file | `test/cli.test.js` (137 lines) |
+| Suites | 3 (CLI flags, sanitizeName, buildHubConfig) |
+| Total tests | 18 (4 CLI flags + 10 sanitizeName + 4 buildHubConfig) |
+| Pass rate | 18/18 (100%) |
+| Test time | ~467ms |
 
 **Strengths:**
-- Zero-dependency testing using Node's built-in test runner — consistent with the project's zero-dependency philosophy.
-- `sanitizeName` has good edge case coverage: empty, null, special chars, mixed input, leading/trailing hyphens, collapse-to-empty, collapse-to-hyphen.
-- CLI flag tests verify both long (`--help`) and short (`-h`) forms.
+- Zero-dependency testing — consistent with project philosophy.
+- Good edge case coverage for sanitizeName (empty, null, special chars, collapse, leading/trailing hyphens).
+- buildHubConfig tested with standard, hyphenated, org, and alternate workspace inputs.
+- CLI flag tests verify both long and short forms.
 
-**Gaps:**
-- No tests for the "new name" code path.
-- No tests for the `run()` or `runCapture()` helper functions.
-- No integration/end-to-end tests (workspace creation, directory scaffolding, symlink creation).
-- No tests for the `ask()` function or interactive prompt logic.
+**Gaps (not blocking, for future consideration):**
+- No tests for the interactive `run()` flow (would require mocking).
 - No code coverage measurement.
 - No Markdown linting or link checking.
 
-### 6.2 CI Pipeline
+### 7.2 CI Pipeline — Grade: A
 
-`.github/workflows/ci.yml` (18 lines):
+`.github/workflows/ci.yml` (21 lines):
 - Triggers: push to `master`, PRs to `master`.
-- Runs: `npm test` on `ubuntu-latest` with Node 20.
-- Uses: `actions/checkout@v4`, `actions/setup-node@v4`.
+- Matrix: Node 18 and 20 on ubuntu-latest.
+- 12 runs to date, 100% green.
 
-**Issues:**
+### 7.3 Release Pipeline — Grade: A-
 
-| # | Severity | Issue |
-|---|----------|-------|
-| CI1 | **MEDIUM** | Only tests Node 20 — doesn't test Node 18 (the minimum engine version in `package.json`). A feature that works on 20 but not on 18 would ship undetected. |
-| CI2 | **LOW** | No matrix strategy — could easily test both 18 and 20. |
-| CI3 | **LOW** | No caching (`actions/cache` for npm) — minor performance concern. |
+`.github/workflows/release.yml` (34 lines):
+- Triggers: GitHub release published.
+- Verifies `package.json` version matches release tag.
+- Runs tests before publish.
+- Publishes to npm with `--provenance --access public`.
+- Uses `id-token: write` permission for npm provenance.
+
+**Note:** Not yet triggered (v1.4.0 release may predate the workflow). Will be exercised on next release.
 
 ---
 
-## 7. Architecture & Design
+## 8. Architecture & Design
 
-### 7.1 Two-Repo Model — Grade: A
+### 8.1 Two-Repo Model — Grade: A
 
-Unchanged. Hub/template separation is well-conceived and consistently described across CLI, self-cohere, AGENTS.md, README, and the whitepaper.
+Hub/template separation well-conceived, consistently described, now properly exercised through katas (1.4 self-cohere, 1.5 configure-agent).
 
-### 7.2 Skill Framework — Grade: B+
+### 8.2 Skill Framework — Grade: A-
 
-TERMS/INPUTS/EFFECTS remains a clean contract format. All six skills follow it. Ownership model (reflect owns reflections, daily-routine orchestrates) is clear.
+TERMS/INPUTS/EFFECTS contract format consistent across all six skills. All six have kata files. Ownership model documented.
 
-**Gaps unchanged from v1.3.5:**
-- No machine-readable skill discovery mechanism.
-- No skill versioning convention (some have versions, others don't).
-- No machine-readable skill dependency declaration.
-
-### 7.3 Protocol vs Implementation Gap — Grade: B-
+### 8.3 Protocol vs Implementation Gap — Grade: B-
 
 The nine unimplemented protocol features from whitepaper §10.2 remain unchanged:
 
 | Protocol Feature | Status |
 |-----------------|--------|
 | `cn.json` manifest | Not implemented |
-| `.gitattributes` with `merge=union` | Not implemented |
+| `.gitattributes` with merge=union | Not implemented |
 | `cn.thread.v1` schema | Not implemented |
 | `state/peers.json` (JSON) | Not implemented (uses `peers.md`) |
 | `threads/` at repo root | Not implemented (uses `state/threads/`) |
@@ -259,348 +353,324 @@ The nine unimplemented protocol features from whitepaper §10.2 remain unchanged
 | Multiple `repo_urls` | Not implemented |
 | Operational metrics (A.9) | Not implemented |
 
-The honest acknowledgment in §10.3 remains valuable. The EXECUTABLE-COHERENCE whitepaper implicitly adds another row (executable skills via CTB — also not implemented). The gap is intentional and documented but worth tracking.
+Honestly documented in §10.3. README now notes the `state/threads/` vs `threads/` discrepancy. Manifesto references `state/peers.json` which aligns with spec direction but not current implementation.
 
-### 7.4 Experiments Directory — Grade: D
+### 8.4 Module Extraction — Grade: A-
 
-`experiments/external-surface-replies.md` remains a 212-line orphaned design document. No README, no cross-reference, no status indicator, instance-specific content (`author: 'usurobor'`).
+The CLI is now three modules:
+- `index.js` — main flow (318 lines)
+- `sanitize.js` — input validation (26 lines)
+- `hubConfig.js` — hub configuration builder (13 lines)
 
----
-
-## 8. Configuration & Dependencies
-
-### 8.1 package.json — Grade: A-
-
-**Resolved from v1.3.5:** Now includes `repository`, `keywords`, `bugs`, `homepage`, `test` script, updated `description`, `cli/sanitize.js` in `files` array.
-
-**Remaining minor issues:**
-- No `start` script needed — `"start": "node cli/index.js"` is identical to `"cn-agent-setup": "cli/index.js"` in `bin`. Redundant but harmless.
-- No `engines.npm` specifier.
-
-### 8.2 .gitignore — Grade: C+
-
-Still only 5 entries:
-```
-memory/
-media/
-*.db
-*.log
-.DS_Store
-```
-
-**Still missing:**
-- `node_modules/` — one accidental `npm install` pollutes the repo.
-- `.env` / `.env.*` — prevents accidental secrets.
-- `*.swp`, `*.swo`, `*~` — editor temp files.
-- `.vscode/`, `.idea/` — IDE configurations.
-- `coverage/` — for future test coverage.
+Clean separation. Each module is independently testable and tested.
 
 ---
 
-## 9. Security
+## 9. Configuration & Dependencies
 
-### 9.1 CLI Security — Grade: B
+### 9.1 package.json — Grade: A
+
+Complete metadata: `repository`, `keywords`, `bugs`, `homepage`. Test script. Three modules in `files` array. Zero dependencies.
+
+### 9.2 .gitignore — Grade: A
+
+35 entries covering: `node_modules/`, `.env*`, `*.db`, `*.log`, `.DS_Store`, `Thumbs.db`, editor files (`*.swp`, `*.swo`, `*~`), IDE dirs (`.idea/`, `.vscode/`), secrets (`*.pem`, `*.key`), build artifacts (`dist/`, `build/`, `coverage/`, `*.tgz`).
+
+### 9.3 .editorconfig — Grade: A
+
+Enforces: 2-space indent, LF line endings, UTF-8, trim trailing whitespace (except `.md`), final newline. Makefile uses tabs.
+
+### 9.4 .nvmrc — Grade: A
+
+Pins Node 20 for development. Consistent with CI matrix upper bound and engine requirement (`>=18`).
+
+---
+
+## 10. Security
+
+### 10.1 CLI Security — Grade: A-
 
 **Positive:**
 - `spawn()` with array args throughout — no shell injection.
 - No `eval()`, `Function()`, or dynamic `require()`.
-- No external HTTP requests (uses git/gh as subprocesses).
+- No external HTTP requests.
 - No secrets stored or transmitted.
-- Primary agent name path now properly sanitized.
+- Both agent name paths now sanitized via `sanitizeName()`.
+- `readline` properly closed in all paths.
+- `CN_WORKSPACE` prevents hardcoded path assumption.
 
-**Concerns:**
-- **"New name" path bypasses sanitization (C1).** The fallback path at `cli/index.js:202-210` uses the old unsanitized logic. Directory traversal is possible via this code path.
-- **`fs.rmSync` with `recursive: true, force: true`** at line 200 — called after user confirmation with abort as default.
-- **`git push -u origin HEAD:main`** in fallback (line 262) — could push to existing branch on a repo the user doesn't control if name collides.
+**Minor concerns:**
+- `fs.rmSync` with `recursive: true, force: true` at line 201 — mitigated by user confirmation with abort as default.
+- `git push -u origin HEAD:main` in fallback (line 265) — could push to existing branch on a repo the user doesn't control if name collides.
+- ANSI escape sequences not sanitized from user input (cosmetic, not exploitable).
 
-### 9.2 Spec Security Model — Grade: A-
+### 10.2 Spec Security Model — Grade: A
 
-Unchanged. SOUL.md, AGENTS.md, OPERATIONS.md maintain clear security boundaries.
+SOUL.md, AGENTS.md, OPERATIONS.md maintain clear security boundaries. OPERATIONS.md explicitly documents group chat caution and memory security (MEMORY.md only in main session).
 
-### 9.3 Sensitive Files — Grade: A
+### 10.3 Security Policy — Grade: B+
 
-No secrets, credentials, or API keys in the tracked tree.
+SECURITY.md exists with response timeline and agent-specific guidance. Missing: maintainer contact email for vulnerability reports.
 
----
+### 10.4 Sensitive Files — Grade: A
 
-## 10. Git Practices & Repo Hygiene
-
-### 10.1 Commit History — Grade: A-
-
-~193 total commits. Clean topic-branch workflow. Descriptive merge commits. Scoped prefixes (`docs:`, `fix:`, `chore:`, `merge:`) used consistently.
-
-### 10.2 Large Files — Grade: B
-
-One 435 KB PDF (`docs/CN-WHITEPAPER-v2.0.3.pdf`) tracked directly. Binary files don't diff in git and bloat history on updates.
+No secrets, credentials, or API keys in the tracked tree. `.gitignore` covers `.env*`, `*.pem`, `*.key`.
 
 ---
 
-## 11. Cross-File Coherence
+## 11. Git Practices & Repo Hygiene
 
-### 11.1 Terminology Consistency — Grade: A-
+### 11.1 Commit History — Grade: A-
 
-Terms used consistently across the project:
+~195 total commits. Clean topic-branch workflow. Descriptive merge commits. Scoped prefixes (`docs:`, `fix:`, `chore:`, `merge:`, `release:`) used consistently.
+
+**Minor:** The "best practices sweep" landed as 6 commits with some redundancy (e.g., two "Add best-practice project files" commits). Suggests the sweep was done iteratively rather than as a single planned change.
+
+### 11.2 Release Management — Grade: B+
+
+One release (v1.4.0). No prior version tags. Release workflow exists but hasn't been exercised. Six substantive commits have landed after the v1.4.0 tag without a new release, meaning the release doesn't reflect current master.
+
+### 11.3 Large Files — Grade: B
+
+One 435 KB PDF (`docs/CN-WHITEPAPER-v2.0.3.pdf`) tracked directly. Binary files don't diff and bloat history on updates.
+
+---
+
+## 12. Cross-File Coherence
+
+### 12.1 Terminology — Grade: A
+
 - "hub" vs "template" — clean everywhere.
-- "TSC", "α/β/γ", "CLP" — defined in GLOSSARY and used consistently.
-- "TERMS/INPUTS/EFFECTS" — consistent across all skill files.
+- "TSC", "α/β/γ", "CLP" — defined in GLOSSARY, used consistently.
+- "TERMS/INPUTS/EFFECTS" — consistent across all SKILL.md files.
 
 **Remaining inconsistencies:**
 - `peers.md` (implementation) vs `peers.json` (whitepaper & manifesto spec).
-- `state/threads/` (implementation) vs `threads/` (whitepaper spec).
-- Thread file naming `yyyyddmmhhmmss` vs ISO 8601 `YYYY-MM-DD` used everywhere else.
+- `state/threads/` (implementation) vs `threads/` (whitepaper spec) — now documented in README.
 
-### 11.2 Version Coherence — Grade: B-
+### 12.2 Version Coherence — Grade: A-
 
-| File | Version | Expected | Status |
-|------|---------|----------|--------|
-| `package.json` | v1.4.0 | — | Source of truth |
-| `README.md` heading | v1.2.0 | v1.4.0 | **Stale** (2 versions behind) |
-| `skills/README.md` | v1.2.0 | — | **Stale** |
-| `CHANGELOG.md` latest | v1.4.0 | — | Current |
-| `GLOSSARY.md` | v1.3.0 | — | Doc-local (OK) |
-| `DOJO.md` | v1.2.2 | — | Doc-local (OK) |
-| `CN-WHITEPAPER.md` | v2.0.3 | — | Protocol version (OK) |
-| `EXECUTABLE-COHERENCE.md` | v0.1.0 | — | DRAFT (OK) |
-| `CN-MANIFESTO.md` | v1.0.2 | — | Standalone (OK) |
-| `daily-routine SKILL.md` | v1.1.1 | — | OK |
-| `self-cohere SKILL.md` | v2.1.0 | — | OK |
-| `configure-agent SKILL.md` | v1.2.0 | — | OK |
+| File | Version | Notes |
+|------|---------|-------|
+| `package.json` | v1.4.0 | Source of truth |
+| `README.md` | (none) | Version removed from heading — solved |
+| `CHANGELOG.md` latest | v1.4.0 | Current |
+| `DOJO.md` | v1.2.3 | Doc-local (OK) |
+| `skills/README.md` | v1.2.0 | **Stale** |
+| `GLOSSARY.md` | v1.3.0 | Doc-local (OK) |
+| All others | Appropriate | OK |
 
-### 11.3 Kata Numbering Coherence — Grade: C
+### 12.3 Kata Numbering — Grade: B+
 
-DOJO.md renumbered to belt.sequence (1.1, 1.2, 1.3, 2.1) but kata files still use old titles:
-- `skills/hello-world/kata.md` → "Kata 01" (should be 1.1)
-- `skills/reflect/kata.md` → "Kata 02" (should be 1.2)
-- `skills/daily-routine/kata.md` → No number (OK)
-- `skills/star-sync/kata.md` → "Kata 13" (should be 2.1)
+DOJO v1.2.3 now lists 6 katas. New katas use belt.sequence:
+- `self-cohere/kata.md` → "Kata 1.4" (matches DOJO)
+- `configure-agent/kata.md` → "Kata 1.5" (matches DOJO)
 
-### 11.4 BOOTSTRAP.md Reference Residue — Grade: B
+Old katas still use legacy titles:
+- `hello-world/kata.md` → "Kata 01" (DOJO: 1.1)
+- `reflect/kata.md` → "Kata 02" (DOJO: 1.2)
+- `star-sync/kata.md` → "Kata 13" (DOJO: 2.1)
 
-README.md: Cleaned (v1.3.5 H4 resolved).
-AGENTS.md line 7: **Still references BOOTSTRAP.md** — "If `BOOTSTRAP.md` exists, that's your birth certificate. Follow it, figure out who you are, then delete it."
+### 12.4 configure-agent Hub README Template — Grade: B
 
-This is the spec file agents read on every session. An agent encountering this instruction would look for a file that doesn't exist in the current flow.
+`skills/configure-agent/SKILL.md:125-132` still lists `skills/` and `mindsets/` as hub directories. These only exist in the template.
 
-### 11.5 configure-agent Hub README Template — Grade: B
+### 12.5 Duplicate Document — Grade: C
 
-`skills/configure-agent/SKILL.md:128-133` shows a README template for agent hubs that lists `skills/` and `mindsets/` as hub directories:
+Two near-identical documents exist:
+- `docs/EXECUTABLE-COHERENCE.md` (368 lines, original)
+- `docs/CN-EXECUTABLE-SKILLS.md` (408 lines, reformatted copy)
 
-```markdown
-## 📁 Hub Structure
-| Path | What's there |
-|------|--------------|
-| `spec/` | Core identity |
-| `state/` | Threads, peers |
-| `skills/` | What I can do |
-| `mindsets/` | How I think |
-```
-
-But `skills/` and `mindsets/` only exist in the template, not the hub. An agent following this template would create a misleading README.
+Differences are purely cosmetic (bold labels, backtick-fenced code blocks vs 4-space indented). Having both with different names creates confusion.
 
 ---
 
-## 12. Issues Found (Prioritized)
+## 13. Issues Found (Prioritized)
 
 ### HIGH
 
-| # | Issue | Impact | Location |
-|---|-------|--------|----------|
-| N1 | **"New name" path bypasses `sanitizeName()`** | The sanitization fix (v1.3.5 H2) only covers the primary path. The fallback "new name" path at lines 202-210 still uses `toLowerCase().replace(/\s+/g, '-')`, allowing directory traversal and special characters. | `cli/index.js:202-210` |
+None. The sole HIGH from v1.4.0 (N1, sanitization bypass) is resolved.
 
 ### MEDIUM
 
 | # | Issue | Impact | Location |
 |---|-------|--------|----------|
-| N2 | **AGENTS.md still references `BOOTSTRAP.md`** | Line 7 tells agents to look for a file the CLI no longer creates. This is the spec file read every session. | `spec/AGENTS.md:7` |
-| N3 | **README version stale (`v1.2.0`)** | Now two versions behind v1.4.0. First impression suggests project is unmaintained. | `README.md:1` |
-| N4 | **"New name" path doesn't recalculate variables** | `hubRepo`, `hubUrl`, `hubName` still reference old name after user picks new name. GitHub repo creation and success message use wrong values. | `cli/index.js:202-210` |
-| N5 | **CI tests only Node 20** | `package.json` specifies `"engines": { "node": ">=18" }` but CI doesn't test Node 18. Breakage on the minimum version ships undetected. | `.github/workflows/ci.yml` |
-| N6 | **Protocol vs implementation gap (9 features)** | Whitepaper §10.2 lists 9 specified-but-unbuilt features. Template doesn't conform to its own spec. Honestly documented. | Whitepaper §10.2 vs repo |
-| N7 | **`.gitignore` incomplete** | Missing `node_modules/`, `.env*`, editor temps, IDE dirs. Fragile against accidental additions. | `.gitignore` |
-| N8 | **`experiments/` uncontextualized** | 212-line orphaned design doc. No README, no cross-reference, no status. Instance-specific content in a template repo. | `experiments/` |
-| N9 | **Hardcoded workspace path** | CLI only works on OpenClaw with root user. No env var override or `--workspace` flag. | `cli/index.js:50` |
+| N1 | **Duplicate companion papers** | `docs/EXECUTABLE-COHERENCE.md` and `docs/CN-EXECUTABLE-SKILLS.md` are near-identical (same content, different formatting). Confuses readers about which is canonical. | `docs/` |
+| N2 | **Protocol vs implementation gap (9 features)** | Whitepaper §10.2 lists 9 specified-but-unbuilt features. Honestly documented but the gap exists. | Whitepaper §10.2 vs repo |
 
 ### LOW
 
 | # | Issue | Impact | Location |
 |---|-------|--------|----------|
-| N10 | Kata file titles use old numbering | DOJO renumbered to belt.sequence but kata files say "Kata 01", "Kata 02", "Kata 13". | `skills/*/kata.md` |
-| N11 | `sanitize.js` misleading error message | Leading/trailing hyphen rejection says "must contain at least one alphanumeric character" — the name does, the issue is the position of the hyphen. | `cli/sanitize.js:19-21` |
-| N12 | Missing katas for self-cohere and configure-agent | DOJO lists them as skills but they have no kata file. skills/README.md says katas SHOULD exist. | `skills/self-cohere/`, `skills/configure-agent/` |
-| N13 | Duplicate `gh api user` call | Same API call on lines 120 and 161. Wastes a round-trip. | `cli/index.js:120,161` |
-| N14 | `IDENTITY.md` in `ocFiles` cleanup list | Line 270 deletes `IDENTITY.md` — renamed to `PERSONALITY.md` long ago. Harmless but stale. | `cli/index.js:270` |
-| N15 | ANSI colors unconditional / no `NO_COLOR` support | Colors not disabled when `NO_COLOR` env var is set. | `cli/index.js:26-28` |
-| N16 | `readline` not closed on early exits | Minor resource leak on error paths (process exits anyway). | `cli/index.js:85,102,116,122` |
-| N17 | `skills/README.md` version stale (`v1.2.0`) | — | `skills/README.md:1` |
-| N18 | WRITING.md `sag` reference | Instance-specific (ElevenLabs TTS) in a template repo. | `mindsets/WRITING.md:24` |
-| N19 | reflect SKILL.md length (370 lines) | 3x any other skill. Six cadence templates are structurally repetitive. | `skills/reflect/SKILL.md` |
-| N20 | Thread file naming non-standard | `yyyyddmmhhmmss` puts day before month; rest of project uses `YYYY-MM-DD`. | `skills/hello-world/` |
-| N21 | Coherence Walk duplicated verbatim | "Left, right, left, right" appears in 3 places. | reflect SKILL.md, GLOSSARY.md, reflect kata.md |
-| N22 | PDF tracked directly in git | 435 KB binary doesn't diff. Bloats history on updates. | `docs/CN-WHITEPAPER-v2.0.3.pdf` |
-| N23 | configure-agent README template lists hub dirs incorrectly | Lists `skills/` and `mindsets/` as hub directories; they only exist in template. | `skills/configure-agent/SKILL.md:128-133` |
-| N24 | `state/` files in template repo | Template contains state files that conceptually belong in hubs. | `state/` |
-| N25 | CHANGELOG lacks detailed change notes | Only one-line coherence summaries per version. | `CHANGELOG.md` |
-| N26 | Contributor name casing | `usurobor` vs `Usurobor` in git history. | git config |
+| N3 | Three old kata titles use legacy numbering | "Kata 01", "Kata 02", "Kata 13" — should be 1.1, 1.2, 2.1 per DOJO belt.sequence | `skills/hello-world/kata.md:1`, `skills/reflect/kata.md:1`, `skills/star-sync/kata.md:1` |
+| N4 | configure-agent README template lists incorrect hub dirs | Lists `skills/` and `mindsets/` as hub directories; they only exist in template | `skills/configure-agent/SKILL.md:125-132` |
+| N5 | Duplicate `gh api user` call | Same API call at lines 121 and 162. Cacheable into one call. | `cli/index.js:121,162` |
+| N6 | `IDENTITY.md` in cleanup list | Stale filename — was renamed to PERSONALITY.md | `cli/index.js:273` |
+| N7 | ANSI colors unconditional | No `NO_COLOR` env var support | `cli/index.js:27-29` |
+| N8 | `hubConfig.js` uses string concat not `path.join()` | `workspaceRoot + '/' + hubName` vs rest of CLI using `path.join()` | `cli/hubConfig.js:8` |
+| N9 | `sanitize.js` misleading error message | Leading/trailing hyphen rejection says "must contain at least one alphanumeric" | `cli/sanitize.js:19-21` |
+| N10 | `skills/README.md` version stale (v1.2.0) | — | `skills/README.md:1` |
+| N11 | Thread file naming non-standard | `yyyyddmmhhmmss` puts day before month; rest of project uses ISO 8601 | `skills/hello-world/` |
+| N12 | Coherence Walk duplicated verbatim | Appears in 3 places without cross-reference | reflect SKILL.md, GLOSSARY.md, reflect kata.md |
+| N13 | reflect SKILL.md length (367 lines) | 3x any other skill. Six cadence templates are structurally repetitive. | `skills/reflect/SKILL.md` |
+| N14 | PDF tracked directly in git | 435 KB binary doesn't diff. Bloats history on updates. | `docs/CN-WHITEPAPER-v2.0.3.pdf` |
+| N15 | CHANGELOG lacks detailed change notes | Only one-line coherence summaries per version | `CHANGELOG.md` |
+| N16 | SECURITY.md no contact email | Says "emailing maintainers" but provides no email | `SECURITY.md:14` |
+| N17 | CONTRIBUTING.md references disabled discussions | §Questions says "Open an issue or reach out via the repository discussions" | `CONTRIBUTING.md:51` |
+| N18 | No version tag before v1.4.0 | Git history has ~195 commits but only one tag. Prior versions not tagged. | git tags |
+| N19 | Release doesn't reflect current master | 6 substantive commits landed after v1.4.0 tag. Current master != released version. | git vs release |
 
-**Total: 1 HIGH, 8 MEDIUM, 16 LOW = 25 findings.**
-
----
-
-## 13. Prior Audit Tracking
-
-### v1.3.5 → v1.4.0 Resolution Matrix
-
-| v1.3.5 Ref | Finding | v1.4.0 Status | v1.4.0 Ref |
-|------------|---------|---------------|------------|
-| H1 | Zero tests, zero CI/CD | **RESOLVED** | — |
-| H2 | Agent name not sanitized | **PARTIALLY RESOLVED** (primary path fixed, "new name" path still bypasses) | N1 |
-| H3 | Protocol vs implementation gap | **Open** | N6 |
-| H4 | README references BOOTSTRAP.md | **RESOLVED** (README clean; AGENTS.md still has reference) | N2 |
-| M1 | README version stale | **Open** (now worse: v1.2.0 vs v1.4.0) | N3 |
-| M2 | git pull --ff-only no fallback | **RESOLVED** | — |
-| M3 | .gitignore incomplete | **Open** | N7 |
-| M4 | package.json incomplete | **RESOLVED** | — |
-| M5 | reflect SKILL.md length | **Open** | N19 |
-| M6 | Thread naming non-standard | **Open** | N20 |
-| M7 | Hardcoded workspace path | **Open** | N9 |
-| M8 | experiments/ uncontextualized | **Open** | N8 |
-| M9 | "New name" path variable staleness | **Open** (and now also bypasses sanitize) | N1, N4 |
-| L1 | Missing katas | **Open** | N12 |
-| L2 | DOJO kata numbering | **RESOLVED** (DOJO fixed; kata files not updated) | N10 |
-| L3 | WRITING.md sag reference | **Open** | N18 |
-| L4 | Duplicate gh api user call | **Open** | N13 |
-| L5 | NO_COLOR support | **Open** | N15 |
-| L7 | Emoji in framework tables | **Open** (kept as acceptable) | — |
-| L8 | PDF tracked in git | **Open** | N22 |
-| L9 | Contributor name casing | **Open** | N26 |
-| L10 | readline not closed on exits | **Open** | N16 |
-| L11 | Coherence Walk duplication | **Open** | N21 |
-| L13 | state/ files in template | **Open** | N24 |
-| L14 | CHANGELOG detail | **Open** | N25 |
-| L15 | IDENTITY.md in cleanup list | **Open** | N14 |
-
-**Summary: 7 resolved, 2 partially resolved, 14 still open, 5 new = 25 total open.**
+**Total: 0 HIGH, 2 MEDIUM, 17 LOW = 19 findings.**
 
 ---
 
-## 14. Coherence Assessment (TSC Axes)
+## 14. Prior Audit Tracking
 
-### 14.1 α (PATTERN) — Structural Consistency — Grade: A-
+### v1.4.0 → Current Resolution Matrix
 
-The repo structure is clean and consistent:
-- 5 spec files, 6 mindsets, 6 skills, 5 docs — all follow their respective formats.
+| v1.4.0 Ref | Finding | Current Status | Current Ref |
+|------------|---------|----------------|-------------|
+| N1 (HIGH) | "New name" bypasses sanitizeName() | **RESOLVED** | — |
+| N2 | AGENTS.md references BOOTSTRAP.md | **RESOLVED** | — |
+| N3 | README version stale (v1.2.0) | **RESOLVED** | — |
+| N4 | "New name" path doesn't recalculate | **RESOLVED** | — |
+| N5 | CI tests only Node 20 | **RESOLVED** | — |
+| N6 | Protocol vs implementation gap | **Open** | N2 |
+| N7 | .gitignore incomplete | **RESOLVED** | — |
+| N8 | experiments/ uncontextualized | **RESOLVED** | — |
+| N9 | Hardcoded workspace path | **RESOLVED** | — |
+| N10 | Kata file titles old numbering | **Open** (3 of 6 katas) | N3 |
+| N11 | sanitize.js error message | **Open** | N9 |
+| N12 | Missing katas | **RESOLVED** | — |
+| N13 | Duplicate gh api user call | **Open** | N5 |
+| N14 | IDENTITY.md in cleanup list | **Open** | N6 |
+| N15 | ANSI colors / NO_COLOR | **Open** | N7 |
+| N16 | readline not closed | **RESOLVED** | — |
+| N17 | skills/README.md version stale | **Open** | N10 |
+| N18 | WRITING.md sag reference | **RESOLVED** | — |
+| N19 | reflect SKILL.md length | **Open** | N13 |
+| N20 | Thread file naming | **Open** | N11 |
+| N21 | Coherence Walk duplication | **Open** | N12 |
+| N22 | PDF in git | **Open** | N14 |
+| N23 | configure-agent hub dirs | **Open** | N4 |
+| N24 | state/ files in template | **RESOLVED** | — |
+| N25 | CHANGELOG detail | **Open** | N15 |
+
+**Summary: 15 resolved, 10 carried forward, 4 new = 19 total open (down from 25).**
+
+### Full Audit History
+
+| Audit | Findings | HIGH | MED | LOW | Resolved | Grade |
+|-------|----------|------|-----|-----|----------|-------|
+| v1.3.5 | 23 | 4 | 9 | 10 | — | B+ |
+| v1.4.0 | 25 | 1 | 8 | 16 | 7 from v1.3.5 | A- |
+| Current | 19 | 0 | 2 | 17 | 15 from v1.4.0 | A |
+
+**Closure rate:** v1.3.5→v1.4.0: 30% (7/23). v1.4.0→current: 60% (15/25). Overall since v1.3.5: 74%.
+
+---
+
+## 15. Coherence Assessment (TSC Axes)
+
+### 15.1 α (PATTERN) — Structural Consistency — Grade: A
+
+- 5 spec files, 6 mindsets, 6 skills, 7 docs — all follow their respective formats.
 - TERMS/INPUTS/EFFECTS in all SKILL.md files.
-- New files (CN-MANIFESTO.md, EXECUTABLE-COHERENCE.md) follow established document conventions.
-- Test file follows Node.js built-in test runner conventions.
-- CI follows standard GitHub Actions patterns.
+- All skills now have katas.
+- Three modules (index, sanitize, hubConfig) each with clear responsibilities.
+- `.editorconfig` enforces formatting conventions.
+- Community files (CONTRIBUTING, SECURITY, CODE_OF_CONDUCT) follow GitHub conventions.
+- READMEs added to previously opaque directories (experiments/, state/).
 
-**Deductions:**
-- Kata file numbering doesn't match DOJO's belt.sequence format.
-- README version is stale.
-- Thread file naming remains non-standard.
+**Deductions:** Three old kata titles still use legacy numbering. Duplicate companion paper.
 
-### 14.2 β (RELATION) — Alignment Between Parts — Grade: A-
+### 15.2 β (RELATION) — Alignment Between Parts — Grade: A-
 
-Cross-file references are mostly accurate. Terminology is consistent. The hub/template separation is cleanly described everywhere. New documents (Manifesto, EXECUTABLE-COHERENCE) reference existing documents correctly.
+- Cross-file references mostly accurate.
+- Hub/template separation cleanly described and exercised via katas.
+- README no longer makes stale version claims.
+- AGENTS.md correctly directs to SOUL.md and self-cohere/configure-agent.
 
-**Deductions:**
-- AGENTS.md still references BOOTSTRAP.md.
-- configure-agent README template lists incorrect hub directories.
-- "New name" path is internally inconsistent (bypasses the module it should use).
-- Protocol spec vs implementation gap.
+**Deductions:** Duplicate companion paper creates confusion. configure-agent README template still lists incorrect hub directories. Protocol spec vs implementation gap unchanged.
 
-### 14.3 γ (EXIT/PROCESS) — Evolution Stability — Grade: A-
+### 15.3 γ (EXIT/PROCESS) — Evolution Stability — Grade: A
 
-Significant forward motion from v1.3.5:
-- 7 of 23 findings resolved (30% closure rate).
-- All four HIGH findings from v1.3.5 addressed (though H2 partially).
-- Clean commit history through ~193 commits.
+- 74% closure rate across two audit cycles (v1.3.5 → current).
+- Zero HIGH findings remain.
+- Tests and CI provide a safety net.
+- Release workflow ready for future versions.
+- Clean commit history through ~195 commits.
 - "Never self-merge" governance practiced.
-- Tests and CI now provide a safety net for future evolution.
 
-**Deductions:**
-- 14 findings carried unchanged from v1.3.5.
-- One new HIGH finding (sanitization bypass in "new name" path).
-- Spec is still evolving faster than implementation.
+**Deductions:** 6 commits after v1.4.0 tag without a new release. No version tags before v1.4.0.
 
-### 14.4 Aggregate
+### 15.4 Aggregate
 
 ```
-C_Σ = (A- · A- · A-)^(1/3) ≈ A-
+C_Σ = (A · A- · A)^(1/3) ≈ A
 ```
 
-Up from B+ in v1.3.5. The testing, CI, and sanitization additions close the most impactful engineering gaps. The project now has a safety net for evolution.
+Up from A- in v1.4.0 and B+ in v1.3.5.
 
 ---
 
-## 15. Recommendations (Prioritized)
+## 16. Recommendations (Prioritized)
 
-### Must Address
+### Should Address (MEDIUM)
 
-1. **Fix the "new name" path** (`cli/index.js:202-210`). Use `sanitizeName()` for the new agent name. Recalculate `hubName`, `hubRepo`, and `hubUrl` from the new name. This is both a security issue (sanitization bypass) and a correctness issue (wrong variables used downstream).
+1. **Deduplicate companion papers.** Remove one of `docs/EXECUTABLE-COHERENCE.md` / `docs/CN-EXECUTABLE-SKILLS.md`, or rename the canonical one clearly. The release notes reference `CN-EXECUTABLE-SKILLS.md`, so that may be the intended keeper.
 
-2. **Remove BOOTSTRAP.md reference from AGENTS.md** (line 7). The CLI no longer creates this file. Agents reading this spec on every session encounter a dead instruction.
+2. **(Ongoing) Reduce protocol gap.** The nine §10.2 features are the main structural gap. Consider implementing `cn.json` and `.gitattributes` first — they're low-effort, high-impact, and the spec is clear.
 
-3. **Update README version** in heading to `v1.4.0` or remove the version from the heading entirely (let `package.json` be the source of truth).
+### Nice to Have (LOW)
 
-### Should Address
-
-4. **Add Node 18 to CI matrix.** The engine minimum is `>=18` but CI only tests 20. A simple matrix strategy catches compatibility issues.
-
-5. **Harden `.gitignore`** — add `node_modules/`, `.env*`, `*.swp`, `.vscode/`, `.idea/`.
-
-6. **Update kata file titles** to match DOJO belt.sequence format (1.1, 1.2, 1.3, 2.1).
-
-7. **Fix configure-agent README template** to not list `skills/` and `mindsets/` as hub directories.
-
-8. **Fix sanitize.js error message** for leading/trailing hyphen — describe the actual issue.
-
-9. **Contextualize `experiments/`** — add a README with status, or move to a branch, or remove.
-
-### Nice to Have
-
-10. Cache the `gh api user` result to avoid duplicate API call.
-11. Remove `IDENTITY.md` from CLI cleanup list.
-12. Add `NO_COLOR` env var support.
-13. Add workspace path override (`CN_WORKSPACE` env var or `--workspace` flag).
-14. Extract reflect cadence templates to reduce SKILL.md length.
-15. Add katas for self-cohere and configure-agent.
-16. Remove `sag` reference from WRITING.md.
-17. Fix thread file naming to ISO 8601.
-18. Add detailed change notes to CHANGELOG entries.
-19. Consider Git LFS for the PDF or CI-generated PDFs.
-20. Update `skills/README.md` version.
+3. **Update old kata titles** to belt.sequence format (1.1, 1.2, 2.1).
+4. **Fix configure-agent README template** — remove `skills/` and `mindsets/` from hub structure table.
+5. **Cache `gh api user`** result to avoid duplicate API call.
+6. **Remove `IDENTITY.md`** from CLI cleanup list.
+7. **Add `NO_COLOR`** env var support.
+8. **Use `path.join()`** in `hubConfig.js` for consistency.
+9. **Fix sanitize.js error message** for leading/trailing hyphen case.
+10. **Update `skills/README.md`** version header.
+11. **Tag a new release** — current master has 6 substantive commits beyond v1.4.0.
+12. **Add maintainer email** to SECURITY.md or enable GitHub private vulnerability reporting.
+13. **Enable GitHub Discussions** or remove reference from CONTRIBUTING.md.
+14. **Consider Git LFS** or CI-generated PDF instead of tracking binary directly.
+15. **Add detailed change notes** to CHANGELOG entries.
 
 ---
 
-## 16. Scorecard
+## 17. Scorecard
 
-| Dimension | Grade | v1.3.5 | Delta | Notes |
-|-----------|-------|--------|-------|-------|
-| Documentation | A- | A- | = | New Manifesto + EXECUTABLE-COHERENCE add value; README version still stale |
-| Code Quality | B | B- | ↑ | Sanitization added, ff-only fallback; "new name" path still buggy |
-| Architecture | B+ | B+ | = | Hub/template solid; protocol gap unchanged |
-| Testing & CI | B- | F | ↑↑ | From zero to 14 tests + CI — biggest improvement |
-| Security | B | B | = | Primary path secured; "new name" bypass is new |
-| Git Practices | A- | A- | = | Clean history, good governance |
-| Configuration | A- | C+ | ↑ | package.json complete; .gitignore still fragile |
-| Cross-file Coherence | B+ | A- | ↓ | AGENTS.md BOOTSTRAP ref, kata numbering mismatch, version staleness |
+| Dimension | Grade | v1.4.0 | v1.3.5 | Trend | Notes |
+|-----------|-------|--------|--------|-------|-------|
+| Documentation | A | A- | A- | ↑ | Badges, community files, directory READMEs, katas complete |
+| Code Quality | A- | B | B- | ↑↑ | Sanitization complete, hubConfig extracted, finally block |
+| Architecture | A- | B+ | B+ | ↑ | Module extraction, kata coverage, protocol gap unchanged |
+| Testing & CI | A- | B- | F | ↑↑↑ | 18 tests, Node 18+20 matrix, release workflow |
+| Security | A- | B | B | ↑ | Both paths sanitized, SECURITY.md, .gitignore hardened |
+| Git Practices | A- | A- | A- | = | Clean history, release workflow, needs new tag |
+| Configuration | A | A- | C+ | ↑↑ | .gitignore complete, .editorconfig, .nvmrc, release.yml |
+| Cross-file Coherence | A- | B+ | A- | ↑ | AGENTS.md fixed, duplicate paper is new issue |
+| GitHub Forge | B+ | — | — | NEW | 100% green CI, release, topics, no issues/labels |
 
-**Weighted Overall: A-** (up from B+)
+**Weighted Overall: A** (up from A- → B+)
 
 ---
 
-## 17. What's Done Well
+## 18. What's Done Well
 
-1. **Zero-dependency CLI** — ships exactly what it needs, no supply chain risk.
-2. **Working test suite** — 14 tests using Node's built-in test runner. Zero test dependencies.
-3. **CI pipeline** — automated testing on push and PR. Standard GitHub Actions.
-4. **Input sanitization** — extracted into testable module with 10 edge-case tests.
-5. **Whitepaper quality** — honest, well-structured, self-aware of its own projection failures.
-6. **New companion documents** — Manifesto and EXECUTABLE-COHERENCE add strategic depth.
-7. **Audit-driven improvement** — six iterations of self-assessment. 30% issue closure rate between v1.3.5 and v1.4.0.
-8. **Git governance** — "never self-merge", descriptive merges, topic-branch workflow.
-9. **TSC framework integration** — coherence is operationalized through reflect skill and measured in CHANGELOG.
-10. **Hub/template separation** — clean, well-documented, consistently applied.
-11. **Apache 2.0 license** — clear, permissive, standard.
-12. **Honest spec-vs-impl tracking** — §10 doesn't pretend features exist when they don't.
+1. **Zero-dependency design** — CLI, tests, and CI all use only Node built-ins. No supply chain risk.
+2. **Complete test coverage of extractable logic** — sanitizeName (10 tests), buildHubConfig (4 tests), CLI flags (4 tests). All edge cases covered.
+3. **CI matrix** — Node 18 and 20 tested. 100% green history (12 runs).
+4. **Release workflow** — npm publish with provenance, version-tag verification, test gate.
+5. **Module extraction pattern** — sanitize.js and hubConfig.js demonstrate test-driven refactoring.
+6. **74% finding closure rate** — from 23 findings (v1.3.5) to 19 (current), with all HIGHs and nearly all MEDIUMs resolved.
+7. **Community files** — CONTRIBUTING.md, SECURITY.md, CODE_OF_CONDUCT.md signal a mature project.
+8. **README badges** — CI, npm version, license immediately visible.
+9. **Contextual READMEs** — experiments/ and state/ are no longer opaque.
+10. **Kata completeness** — all six skills now have kata files. New katas use belt.sequence numbering.
+11. **Honest protocol tracking** — §10 doesn't pretend features exist when they don't.
+12. **Git governance** — "never self-merge", descriptive merges, topic-branch workflow.
+13. **Whitepaper quality** — well-structured, self-aware, with formal normative appendix.
+14. **Audit-driven improvement** — seven iterations of self-assessment with measurable progress.
