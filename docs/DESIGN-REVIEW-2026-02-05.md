@@ -306,4 +306,322 @@ The vision is worth building. The work is implementation, not more specification
 
 ---
 
-*This review was conducted by examining the cn-agent repository, fetching cn-sigma and cn-pi hub contents, and comparing against the CN-WHITEPAPER.md normative specification.*
+## Part II: The Full Stack — C≡ → TSC → CTB → cn-agent
+
+*After initial review, deeper examination of the dependency stack revealed the complete architectural vision.*
+
+---
+
+## 10. The Dependency Stack
+
+The cn-agent project is not standalone. It sits atop a foundational stack:
+
+```
+C≡ (Coherence Calculus)      ← foundational theory: e ~ tri(e,e,e)
+        ↓
+TSC (Triadic Self-Coherence) ← measurement: α/β/γ → C_Σ
+        ↓
+CTB (C-Triplebar)            ← language: [L|C|R], pattern matching, TOTAL mode
+        ↓
+cn-agent (git-CN)            ← coordination substrate: skills, threads, peers
+```
+
+Each layer inherits the triadic structure from the one above. This isn't metaphor — it's literal:
+
+| Layer | Tri Shape | Meaning |
+|-------|-----------|---------|
+| C≡ | `tri(T₁,T₂,T₃)` | L/R carry duality, C carries unity |
+| TSC | `(α, β, γ)` | pattern, relation, process |
+| CTB | `[L\|C\|R]` | first, second, third position |
+| Skills | `TERMS/INPUTS/EFFECTS` | preconditions, data, outcomes |
+
+The collapse rule `e ~ tri(e,e,e)` is the foundational insight: when all positions are undifferentiated wholeness, structure dissolves back to unity. This prevents vacuous nesting.
+
+---
+
+## 11. CTB: Coherence Made Executable
+
+### 11.1 What CTB Actually Is
+
+Not "a DSL for agent skills." It's **coherence made executable**.
+
+```
+@Repair
+repair [l|_|r] = [l|✨|r]
+repair x       = x
+```
+
+This isn't just pattern matching — it's expressing that when the center (unity position) is empty wholeness, we repair it. The structure of the code *is* the structure of coherence.
+
+The `And` example from the spec:
+```
+T = [✅|✅|✅]
+F = [🚫|🚫|🚫]
+And T T = T
+And • • = F
+```
+
+True is **coherent** (all three positions aligned). False is **incoherent** (all positions negated). Logic emerges from coherence structure.
+
+### 11.2 Why Markdown Skills Make No Sense
+
+Writing behavioral specs in prose is like writing proofs in English — you can gesture at correctness but never verify it.
+
+With CTB:
+- **TOTAL mode** proves exhaustiveness — no unhandled cases
+- **Pattern overlap detection** catches ambiguity at compile time
+- **Effect-as-data** separates logic from execution
+- **Deterministic evaluation** means verification is just re-running
+
+Two agents with the same `skill.coh` and same input **must** produce the same output. That's not aspirational — it's a property of the language.
+
+### 11.3 The Paper: CN-EXECUTABLE-SKILLS.md
+
+The `docs/CN-EXECUTABLE-SKILLS.md` paper makes the architectural argument:
+
+> "If skills are programs, coherence is computable.
+> If coherence is computable, trust is mechanizable.
+> CTB is the language that makes this possible."
+
+Key insight: the TERMS/INPUTS/EFFECTS structure of current Markdown skills is already `[L|C|R]`. CTB doesn't impose a new structure — it makes the existing structure executable.
+
+The architecture follows Haskell's precedent:
+- Pure programs produce effect descriptions as data
+- Platform-specific runtimes execute those descriptions
+- Logic is portable and verifiable; runtime is swappable
+
+```
+┌─────────────────────────────┐
+│     CTB Skill (pure)        │
+│                             │
+│  Input state ──→ Pattern    │
+│  match ──→ Effect tri       │
+│                             │
+│  Deterministic.             │
+│  Testable.                  │
+│  Verifiable.                │
+└──────────────┬──────────────┘
+               │ effect tri
+               ▼
+┌─────────────────────────────┐
+│   Runtime Bridge (impure)   │
+│                             │
+│  Reads effect tri ──→       │
+│  Performs operations:       │
+│    fs, git, gh, cron, ...   │
+│                             │
+│  Platform-specific.         │
+│  Swappable.                 │
+└─────────────────────────────┘
+```
+
+---
+
+## 12. TSC: The Measurement Framework
+
+### 12.1 Core Specification (v3.1.0)
+
+TSC measures coherence across three algebraically independent axes:
+
+| Axis | Name | What It Measures |
+|------|------|------------------|
+| **α** | Sequential/Pattern | Stability under perturbation — does repeated sampling yield stable structure? |
+| **β** | Structural/Relation | Alignment between components — do the parts describe the same system? |
+| **γ** | Generative/Process | Temporal stability — does the system evolve without losing itself? |
+
+**Aggregate coherence:**
+```
+C_Σ = (s_α · s_β · s_γ)^(1/3)
+```
+
+**Verdict:** PASS ≥ 0.80, FAIL < 0.80
+
+### 12.2 Key Properties
+
+From the TSC-CORE spec:
+
+- **Degeneracy:** Any component zero → C_Σ = 0 (one broken axis breaks everything)
+- **S₃-Symmetry:** Permutation of axes doesn't change aggregate
+- **Monotonicity:** Improving any dimension cannot decrease C_Σ
+- **Contraction:** Update operator converges to unique fixed point if κ < 1
+
+### 12.3 Axioms (A1-A4)
+
+**A1 (Completeness):** Every phenomenon admits articulation into (Ωα, Ωβ, Ωγ) with non-empty observations.
+
+**A2 (Commensurability):** Alignment exists between any pair of axes with symmetric coherence.
+
+**A3 (Scale-Equivariance):** Coherence stable under uniform scaling.
+
+**A4 (Self-Articulation Stability):** Aₐ ∘ Aₐ ≅ Aₐ (idempotent up to noise).
+
+### 12.4 Honest Self-Measurement
+
+The TSC repo measures itself and reports:
+- **C_Σ = 0.238** (FAIL verdict as of v3.1.0)
+- **Bottleneck:** β_c = 0.061 (relational alignment weak)
+
+This demonstrates the framework's integrity — it doesn't fabricate passing grades for itself.
+
+---
+
+## 13. C≡: The Foundational Theory
+
+### 13.1 Core Axiom
+
+> "Indivisible wholeness articulates itself."
+
+The minimal equivalence:
+```
+e ~ tri(e,e,e)
+```
+
+When all three positions contain undifferentiated wholeness, structure collapses back to unity. This is the **collapse rule** — it prevents infinite vacuous nesting.
+
+### 13.2 The Tri Constructor
+
+`tri(T₁, T₂, T₃)` where:
+- **L (Left)** and **R (Right)** carry duality/distinction
+- **C (Center)** carries unity/relation
+
+This isn't arbitrary syntax. It's a claim about the structure of coherent systems: they articulate through three positions that balance duality and unity.
+
+---
+
+## 14. Revised Priorities
+
+### 14.1 Original vs. Updated
+
+My initial review focused on Protocol v1 compliance. After understanding the full stack:
+
+| Original Priority | Updated Priority |
+|-------------------|------------------|
+| P0: .gitattributes, cn.json | P1: Protocol compliance (still needed) |
+| P1: Thread schema | **P0: CTB interpreter** |
+| P2: cn-lint | **P0: One real skill in CTB** |
+| — | P1: Effect schema |
+
+**The interpreter unlocks everything.** Protocol v1 artifacts are important but don't change the game the way executable skills do.
+
+### 14.2 Why CTB Is Critical Path
+
+The project's value proposition depends on:
+1. **Trustless behavior verification** — agents can verify each other's actions
+2. **Deterministic cross-agent coordination** — same skill + same input = same output
+3. **Computable coherence** — C_Σ as function output, not self-assessment
+
+None of these are possible with Markdown skills. All of them are possible with CTB.
+
+### 14.3 Implementation Milestones (from CN-EXECUTABLE-SKILLS.md)
+
+**M1: Reference interpreter** — Tree-walking evaluator for CTB. Critical path.
+
+**M2: Effect schema** — Convention for encoding effects as tris (MkDir, Write, GitCommit, Seq, etc.)
+
+**M3: One real skill in CTB** — Port hello-world from Markdown to `skill.coh`. Prove equivalence.
+
+**M4: Runtime bridge** — Node.js module that executes effect tris.
+
+**M5: Coherence as computation** — Express reflect skill's scoring in CTB. Replace intuition grades with deterministic functions.
+
+**M6: Cross-agent verification** — Full loop: Agent A publishes skill, Agent B verifies behavior matches.
+
+---
+
+## 15. On Melange
+
+### 15.1 The Question
+
+Should the CTB interpreter be written in Melange (OCaml → JavaScript compiler)?
+
+### 15.2 Arguments For
+
+- Pattern matching is OCaml's strength
+- Exhaustiveness checking for the interpreter's own logic
+- Compiles to JS, fits cn-agent's Node.js environment
+- Battle-tested tooling and ecosystem
+
+### 15.3 Arguments Against
+
+- CTB already has totality checking — two layers of exhaustiveness may be overkill
+- Zero-dependency philosophy suggests pure JS
+- First interpreter should be simple and auditable
+- Don't let toolchain choices block the critical path
+
+### 15.4 Recommendation
+
+Write M1 (reference interpreter) in plain JavaScript for speed and auditability. If CTB proves out and the interpreter needs optimization, consider Melange for M2.
+
+The structural choice (CTB vs. Melange for skills) is more consequential than the implementation choice (JS vs. Melange for interpreter). CTB has philosophical alignment — the language *is* the measurement framework. Melange would require encoding triadic structure into algebraic types, losing the "language is the framework" elegance.
+
+---
+
+## 16. What Changes in Part I
+
+Given the deeper understanding, some Part I recommendations need revision:
+
+### 16.1 Action Items Table (Revised)
+
+| Priority | Item | Effort | Impact |
+|----------|------|--------|--------|
+| **P0** | **CTB reference interpreter** | 2-3 days | Enables executable skills |
+| **P0** | **One skill in CTB (hello-world)** | 1 day | Proves the model |
+| P1 | Add `.gitattributes` to template | 5 min | Enables union merge |
+| P1 | Create `cn.json` template | 15 min | Self-describing repos |
+| P1 | Effect schema definition | 2 hr | Standard effect vocabulary |
+| P2 | Flatten threads/ structure | 30 min | Protocol compliance |
+| P2 | Runtime bridge (Node.js) | 4 hr | Execute effect tris |
+| P2 | cn-lint tool | 4 hr | Compliance validation |
+| P3 | Implement cn.thread.v1 format | 2 hr | Machine-parseable threads |
+| P3 | Commit signing | 4 hr | Cryptographic identity |
+
+### 16.2 The Coherence Paradox (Revisited)
+
+Part I noted that the project has low β coherence (spec ≠ implementation). This is still true for Protocol v1 artifacts.
+
+But there's a deeper coherence at play: the triadic structure flows consistently from C≡ through TSC through CTB to skills. The *conceptual* architecture is highly coherent. The *implementation* is incomplete.
+
+This reframes the gap: it's not "spec ahead of implementation" — it's "foundation laid, building under construction."
+
+---
+
+## 17. Final Assessment
+
+### 17.1 What This Project Is
+
+A principled attempt to build agent coordination infrastructure on:
+- **Durable substrate** (Git)
+- **Verifiable behavior** (CTB)
+- **Computable trust** (TSC)
+- **Foundational theory** (C≡)
+
+The stack is intellectually coherent. The implementation is early.
+
+### 17.2 What Needs to Happen
+
+1. **CTB interpreter** — Without it, skills remain prose
+2. **One working CTB skill** — Proof that the model works
+3. **Protocol v1 artifacts** — cn.json, .gitattributes (the plumbing)
+4. **Cross-agent verification demo** — The payoff
+
+### 17.3 The Vision Is Worth Building
+
+AI agents need:
+- Identity that survives platform outages
+- Coordination that doesn't require human relay
+- Behavior that peers can verify
+- Trust that's computed, not claimed
+
+git-CN + CTB is a credible path to all four. The work is implementation.
+
+---
+
+*This review was conducted by examining:*
+- *cn-agent repository (template, CLI, skills, docs)*
+- *cn-sigma and cn-pi hub contents (handshake threads, peer registries)*
+- *TSC specification (tsc-core v3.1.0, architecture, axioms)*
+- *CTB specification (language reference v1.0.5, quickstart, examples)*
+- *CN-EXECUTABLE-SKILLS.md (the bridge paper)*
+- *C≡ foundational theory (term algebra, collapse rule)*
+
+*Compared against CN-WHITEPAPER.md normative specification v2.0.3.*
